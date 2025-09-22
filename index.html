@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking Sukaneka – Lelaki Dewasa</title>
+<style>
+  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  th { background: #f4f4f4; }
+  .gold { background-color: #ffd700; }
+  .silver { background-color: #c0c0c0; }
+  .bronze { background-color: #cd7f32; color: #fff; }
+</style>
+</head>
+<body>
+
+<h2>Ranking Peserta Lelaki Dewasa</h2>
+<table id="rankingTable">
+  <thead>
+    <tr>
+      <th>Ranking</th>
+      <th>Nama</th>
+      <th>Total Markah</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCfExbX5ULB2iN0TFCZJH7mW5PuLL-sXuE",
+  authDomain: "rasmi-familyday-mak-namah-2025.firebaseapp.com",
+  databaseURL: "https://rasmi-familyday-mak-namah-2025-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "rasmi-familyday-mak-namah-2025",
+  storageBucket: "rasmi-familyday-mak-namah-2025.firebasestorage.app",
+  messagingSenderId: "89130136513",
+  appId: "1:89130136513:web:06db8b10f93c55ece6f540",
+  measurementId: "G-TBZ7J4TC4Q"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Collection Lelaki Dewasa
+const kategori = "admin-kemaskini-markah-dewasa-lelaki";
+const pesertaCol = collection(db, kategori);
+
+onSnapshot(pesertaCol, (snapshot)=>{
+  const tbody = document.querySelector("#rankingTable tbody");
+  const pesertaList = [];
+
+  snapshot.forEach(docSnap => pesertaList.push({id: docSnap.id, ...docSnap.data()}));
+
+  pesertaList.forEach(p=>{
+    let total = 0;
+    for(let i=1;i<=15;i++) total += Number(p['acara'+i]||0);
+    p.total_markah = total;
+  });
+
+  pesertaList.sort((a,b)=>b.total_markah - a.total_markah);
+
+  tbody.innerHTML = "";
+  pesertaList.forEach((p,index)=>{
+    const tr = document.createElement("tr");
+    let className = "";
+    if(index===0) className="gold";
+    else if(index===1) className="silver";
+    else if(index===2) className="bronze";
+
+    tr.innerHTML = `<td class="${className}">${index+1}</td><td class="${className}">${p.nama}</td><td class="${className}">${p.total_markah}</td>`;
+    tbody.appendChild(tr);
+  });
+});
+</script>
+
+</body>
+</html>
